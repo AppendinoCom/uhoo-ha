@@ -28,9 +28,14 @@ Every sensor also exposes these **extra attributes** useful for automations:
 | Attribute | Description |
 |---|---|
 | `color` | uHoo quality rating: `green`, `yellow`, `orange`, `red` |
+| `color_dot` | Visual dot for dashboards: `🟢`, `🟡`, `🟠`, `🔴` |
+| `color_with_dot` | Combined visual value, for example `🟢 green` |
 | `serial_number` | Device serial number |
 | `last_update_iso` | ISO 8601 timestamp of last sensor reading |
 | `last_update_timestamp` | Unix timestamp of last sensor reading |
+
+The integration also creates companion color entities for each metric.
+Example: `sensor.sensorik_vzduchu_temperature_color` with state `🟢 green`.
 
 ---
 

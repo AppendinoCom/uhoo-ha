@@ -19,6 +19,20 @@ from .coordinator import UhooDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
+COLOR_DOTS = {
+    "green": "🟢",
+    "yellow": "🟡",
+    "orange": "🟠",
+    "red": "🔴",
+}
+
+
+def _color_dot(color: str | None) -> str:
+    """Return a unicode dot for a uHoo color string."""
+    if not color:
+        return "⚪"
+    return COLOR_DOTS.get(str(color).lower(), "⚪")
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -34,6 +48,9 @@ async def async_setup_entry(
             if sensor_key in device["sensors"]:
                 entities.append(
                     UhooSensor(coordinator, device_idx, sensor_key, sensor_cfg)
+                )
+                entities.append(
+                    UhooColorSensor(coordinator, device_idx, sensor_key, sensor_cfg)
                 )
 
     async_add_entities(entities)
@@ -103,9 +120,71 @@ class UhooSensor(CoordinatorEntity[UhooDataUpdateCoordinator], SensorEntity):
     def extra_state_attributes(self) -> dict:
         """Expose color rating + device metadata for automations."""
         sensor_data = self._device["sensors"].get(self._sensor_key, {})
+        color = sensor_data.get("color")
+        dot = _color_dot(color)
         device = self._device
         return {
-            "color": sensor_data.get("color"),
+            "color": color,
+            "color_dot": dot,
+            "color_with_dot": f"{dot} {color}" if color else dot,
+            "serial_number": device.get("serialNumber"),
+            "last_update_iso": device.get("last_update_iso"),
+            "last_update_timestamp": device.get("last_update_timestamp"),
+        }
+
+
+class UhooColorSensor(CoordinatorEntity[UhooDataUpdateCoordinator], SensorEntity):
+    """Companion sensor that exposes air-quality color as a colored dot."""
+
+    _attr_has_entity_name = True
+    _attr_icon = "mdi:circle"
+
+    def __init__(
+        self,
+        coordinator: UhooDataUpdateCoordinator,
+        device_idx: int,
+        sensor_key: str,
+        sensor_cfg: dict,
+    ) -> None:
+        super().__init__(coordinator)
+        self._device_idx = device_idx
+        self._sensor_key = sensor_key
+
+        device = coordinator.data[device_idx]
+        serial = device["serialNumber"]
+
+        self._attr_unique_id = f"uhoo_{serial}_{sensor_key}_color"
+        self._attr_name = f"{sensor_cfg['name']} Color"
+
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, serial)},
+            name=device["name"],
+            manufacturer="uHoo",
+            model="uHoo Indoor Air Quality Sensor",
+        )
+
+    @property
+    def _device(self) -> dict:
+        """Return the current device data from the coordinator."""
+        return self.coordinator.data[self._device_idx]
+
+    @property
+    def native_value(self) -> str:
+        sensor_data = self._device["sensors"].get(self._sensor_key, {})
+        color = sensor_data.get("color")
+        dot = _color_dot(color)
+        if color:
+            return f"{dot} {color}"
+        return dot
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        sensor_data = self._device["sensors"].get(self._sensor_key, {})
+        color = sensor_data.get("color")
+        device = self._device
+        return {
+            "color": color,
+            "color_dot": _color_dot(color),
             "serial_number": device.get("serialNumber"),
             "last_update_iso": device.get("last_update_iso"),
             "last_update_timestamp": device.get("last_update_timestamp"),
