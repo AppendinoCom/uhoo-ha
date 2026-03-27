@@ -1,0 +1,5 @@
+{
+  "name": "uHoo Air Quality",
+  "render_readme": true,
+  "homeassistant": "2023.3.0"
+}

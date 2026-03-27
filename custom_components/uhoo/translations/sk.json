@@ -1,0 +1,25 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "uHoo Kvalita Vzduchu",
+        "description": "Zadajte prihlasovacie údaje k uHoo účtu a Android ID zariadenia, na ktorom bežala uHoo aplikácia.",
+        "data": {
+          "email": "E-mail",
+          "password": "Heslo",
+          "android_id": "Android ID"
+        },
+        "data_description": {
+          "android_id": "Získate príkazom: adb shell settings get secure android_id"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Nepodarilo sa pripojiť k uHoo API. Skontrolujte prihlasovacie údaje a Android ID.",
+      "unknown": "Neočakávaná chyba. Skontrolujte logy Home Assistanta."
+    },
+    "abort": {
+      "already_configured": "Tento uHoo účet je už nakonfigurovaný."
+    }
+  }
+}

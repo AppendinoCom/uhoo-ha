@@ -1,0 +1,25 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "uHoo Air Quality",
+        "description": "Enter your uHoo account credentials and the Android ID of the device used with the uHoo app.",
+        "data": {
+          "email": "Email",
+          "password": "Password",
+          "android_id": "Android ID"
+        },
+        "data_description": {
+          "android_id": "Obtain via: adb shell settings get secure android_id"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to the uHoo API. Please check your credentials and Android ID.",
+      "unknown": "Unexpected error. Check the Home Assistant logs for details."
+    },
+    "abort": {
+      "already_configured": "This uHoo account is already configured."
+    }
+  }
+}

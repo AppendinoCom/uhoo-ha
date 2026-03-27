@@ -1,0 +1,11 @@
+{
+  "domain": "uhoo",
+  "name": "uHoo Air Quality",
+  "version": "1.0.0",
+  "config_flow": true,
+  "documentation": "https://github.com/AppendinoCom/uhoo-ha",
+  "issue_tracker": "https://github.com/AppendinoCom/uhoo-ha/issues",
+  "requirements": ["pycryptodome>=3.9.0", "requests>=2.25.0"],
+  "codeowners": ["@AppendinoCom"],
+  "iot_class": "cloud_polling"
+}
