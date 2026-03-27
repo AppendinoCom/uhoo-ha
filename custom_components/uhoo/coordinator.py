@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import requests
 from Crypto.Cipher import AES
@@ -46,7 +46,7 @@ def _parse_payload(payload: dict) -> list[dict]:
         last_update_ts = sensor_data.get("timestamp")
         last_update_iso: str | None = None
         if isinstance(last_update_ts, (int, float)):
-            last_update_iso = datetime.fromtimestamp(last_update_ts).isoformat()
+            last_update_iso = datetime.fromtimestamp(last_update_ts, tz=timezone.utc).isoformat()
 
         sensors: dict[str, dict] = {}
         for key, value in sensor_data.items():

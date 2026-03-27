@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -10,9 +11,10 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN, SENSOR_TYPES
 from .coordinator import UhooDataUpdateCoordinator
@@ -42,8 +44,9 @@ async def async_setup_entry(
     """Set up uHoo sensor entities from a config entry."""
     coordinator: UhooDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
 
-    entities: list[UhooSensor] = []
+    entities: list[SensorEntity] = []
     for device_idx, device in enumerate(coordinator.data):
+        entities.append(UhooLastUpdateSensor(coordinator, device_idx))
         for sensor_key, sensor_cfg in SENSOR_TYPES.items():
             if sensor_key in device["sensors"]:
                 entities.append(
@@ -188,4 +191,53 @@ class UhooColorSensor(CoordinatorEntity[UhooDataUpdateCoordinator], SensorEntity
             "serial_number": device.get("serialNumber"),
             "last_update_iso": device.get("last_update_iso"),
             "last_update_timestamp": device.get("last_update_timestamp"),
+        }
+
+
+class UhooLastUpdateSensor(CoordinatorEntity[UhooDataUpdateCoordinator], SensorEntity):
+    """Server timestamp of the last data update for a uHoo device."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Last Server Update"
+    _attr_icon = "mdi:clock-check-outline"
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self,
+        coordinator: UhooDataUpdateCoordinator,
+        device_idx: int,
+    ) -> None:
+        super().__init__(coordinator)
+        self._device_idx = device_idx
+        device = coordinator.data[device_idx]
+        serial = device["serialNumber"]
+
+        self._attr_unique_id = f"uhoo_{serial}_last_update"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, serial)},
+            name=device["name"],
+            manufacturer="uHoo",
+            model="uHoo Indoor Air Quality Sensor",
+        )
+
+    @property
+    def _device(self) -> dict:
+        """Return the current device data from the coordinator."""
+        return self.coordinator.data[self._device_idx]
+
+    @property
+    def native_value(self) -> datetime | None:
+        ts = self._device.get("last_update_timestamp")
+        if isinstance(ts, (int, float)):
+            return dt_util.utc_from_timestamp(ts)
+        return None
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        device = self._device
+        return {
+            "last_update_iso": device.get("last_update_iso"),
+            "last_update_timestamp": device.get("last_update_timestamp"),
+            "serial_number": device.get("serialNumber"),
         }
