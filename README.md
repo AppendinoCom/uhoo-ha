@@ -37,6 +37,12 @@ Every sensor also exposes these **extra attributes** useful for automations:
 The integration also creates companion color entities for each metric.
 Example: `sensor.sensorik_vzduchu_temperature_color` with state `🟢 green`.
 
+It also creates binary helper entities per metric.
+Example: `binary_sensor.sensorik_vzduchu_co2_is_green`.
+
+- `on` = sensor color is green
+- `off` = sensor color is not green
+
 ---
 
 ## Requirements

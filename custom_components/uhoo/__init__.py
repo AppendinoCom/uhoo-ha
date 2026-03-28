@@ -8,7 +8,7 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from .const import CONF_ANDROID_ID, DOMAIN
 from .coordinator import UhooDataUpdateCoordinator
 
-PLATFORMS = ["sensor"]
+PLATFORMS = ["sensor", "binary_sensor"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
